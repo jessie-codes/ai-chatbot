@@ -15,9 +15,10 @@ This is an AI chatbot application using a React frontend and Python/Django backe
 ### Backend
 
 - **Python 3.12+**
-- **Django** — web framework and REST API
+- **uv** — package and project manager (replaces pip/venv/poetry)
+- **Django** — web framework, ORM, and REST API
 - **Celery** — async task processing
-- **Dagster** — data pipeline orchestration
+- **Dagster** — data pipeline orchestration (manages its own storage/migrations)
 
 ### AI/ML
 
@@ -68,11 +69,10 @@ ai-chatbot/
 │       │   └── users/         # User management
 │       ├── tasks/             # Celery task definitions
 │       ├── pipelines/         # Dagster pipeline definitions
-│       ├── Dockerfile
-│       └── requirements/
-│           ├── base.txt
-│           ├── dev.txt
-│           └── prod.txt
+│       ├── manage.py          # Django management script
+│       ├── pyproject.toml     # uv project config and dependencies
+│       ├── uv.lock            # Locked dependency versions
+│       └── Dockerfile
 ├── infra/                     # Terraform infrastructure
 │   ├── modules/
 │   ├── environments/
@@ -109,23 +109,36 @@ ai-chatbot/
 - Use dataclasses or Pydantic models for structured data
 - Write docstrings for all public modules, classes, and functions
 - Keep functions short and focused (max ~20 lines)
-- Use virtual environments (venv or poetry)
-- Organize imports: stdlib, third-party, local (enforced by isort)
+- Use `uv` for dependency management and virtual environments (`uv sync`, `uv add`, `uv run`)
+- Organize imports: stdlib, third-party, local (enforced by ruff)
 - Use logging module instead of print statements
 - Handle exceptions explicitly — avoid bare `except:`
 - Use `pathlib.Path` over `os.path`
+
+### uv Package Manager
+
+- Use `pyproject.toml` for all dependency declarations (no requirements.txt files)
+- Use `uv add <package>` to add dependencies, `uv add --dev <package>` for dev-only
+- Use `uv sync` to install/update the environment from the lockfile
+- Use `uv run <command>` to execute commands within the managed environment
+- Use `uv lock` to regenerate the lockfile after manual pyproject.toml edits
+- Commit both `pyproject.toml` and `uv.lock` to version control
+- Do NOT commit `.venv/` — uv manages the virtual environment automatically
+- Pin Python version in `pyproject.toml` via `requires-python = ">=3.12"`
 
 ### Django Best Practices
 
 - Use Django REST Framework for API endpoints
 - Keep views thin — business logic belongs in services or domain layer
-- Use Django's ORM efficiently: select_related, prefetch_related, avoid N+1
+- Use Django's ORM for all database access
+- Use Django's built-in migration system (`uv run python manage.py makemigrations` / `migrate`)
+- Use `select_related` and `prefetch_related` to avoid N+1 queries
 - Define custom managers for complex querysets
 - Use Django signals sparingly — prefer explicit calls
 - Store settings per environment (base, dev, prod)
-- Use Django migrations for all schema changes
 - Implement proper permission classes on all API views
 - Use serializers for input validation and output formatting
+- Dagster manages its own storage tables — do NOT create Django migrations for Dagster schemas
 
 ### Docker Best Practices
 
@@ -137,6 +150,7 @@ ai-chatbot/
 - Use health checks in docker-compose and production
 - Keep images minimal — install only what's needed
 - Use environment variables for configuration, never bake secrets into images
+- Install `uv` in the Docker image and use `uv sync --frozen` for reproducible installs
 
 ### AWS Best Practices
 
@@ -195,12 +209,13 @@ ai-chatbot/
 
 - Use feature branches with pull requests
 - Run linters and tests in CI before merge
-- Use pre-commit hooks for formatting (black, isort, prettier, eslint)
+- Use pre-commit hooks for formatting (ruff, prettier, eslint)
 - Write tests for new features and bug fixes
 - Use docker-compose for local development to match production topology
 - Document API changes and breaking changes in PR descriptions
 - Use the root Makefile for common dev tasks (up, down, logs, migrate, shell)
 - Tag releases with semantic versioning (e.g., v0.1-scaffold, v0.2-auth)
+- Use `uv run python manage.py migrate` to apply migrations locally
 
 ## Environment Variables
 
