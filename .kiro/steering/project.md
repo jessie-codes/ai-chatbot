@@ -12,8 +12,6 @@ This is an AI chatbot application using a React frontend and Python/Django backe
 - Functional components with hooks
 - Component-based architecture
 
-#[[file:apps/frontend/AGENTS.md]]
-
 ### Backend
 
 - **Python 3.12+**
