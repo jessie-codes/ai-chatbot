@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Python
+**/__pycache__
+**/*.pyc
+**/.venv
+**/.ruff_cache
+
+# Node
+**/node_modules
+**/.next
+
+# IDE
+.vscode
+.idea
+.kiro
+
+# Docker
+docker-compose.yml
+
+# Misc
+*.sqlite3
+.env
